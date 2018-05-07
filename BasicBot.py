@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.voice_client import VoiceClient
 import platform
 import youtube_dl
-from Token import token
+from Token import token, pointless
 
 startup_extensions = ["Music"]
 
@@ -50,7 +50,6 @@ class General:
     async def insult(ctx):
         """For when you're feeling a bit too good about yourself"""
         id = ctx.message.author.id
-        pointless = "115903852871417863"
         if id == pointless:
             await client.say("Pointless you suck!")
         else:
