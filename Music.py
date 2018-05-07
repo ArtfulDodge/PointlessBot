@@ -65,10 +65,10 @@ class Music:
     """Voice related commands.
     Works in multiple servers at once.
     """
-    vol = 0.05
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
+        self.vol = 0.05
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
