@@ -68,7 +68,7 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
-        self.vol = 0.05
+        self.vol = 0.20
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
