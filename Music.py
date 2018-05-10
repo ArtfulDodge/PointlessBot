@@ -9,6 +9,8 @@ if not discord.opus.is_loaded():
     # note that on windows this DLL is automatically provided for you
     discord.opus.load_opus('opus')
 
+client = discord.Client()
+    
 def __init__(self, bot):
         self.bot = bot
 
@@ -37,6 +39,7 @@ class VoiceState:
 
     def is_playing(self):
         if self.voice is None or self.current is None:
+            
             return False
 
         player = self.current.player
@@ -61,6 +64,7 @@ class VoiceState:
             await self.bot.send_message(self.current.channel, 'Now playing' + str(self.current))
             self.current.player.start()
             await self.play_next_song.wait()
+    
 class Music:
     """Voice related commands.
     Works in multiple servers at once.
@@ -198,7 +202,19 @@ class Music:
             await self.bot.say("Cleared the queue and disconnected from voice channel ")
         except:
             pass
+    
+    async def stopleave(self, state, server):
+        if state.is_playing():
+            player = state.player
+            player.stop()
 
+        try:
+            state.audio_player.cancel()
+            del self.voice_states[server.id]
+            await state.voice.disconnect()
+        except:
+            pass
+    
     @commands.command(pass_context=True, no_pm=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
@@ -236,6 +252,28 @@ class Music:
             skip_count = len(state.skip_votes)
             await self.bot.say('Now playing {} [skips: {}/3]'.format(state.current, skip_count))
             
+    @client.event
+    async def on_voice_state_update(self, before, after):
+        server = before.server
+        state = self.get_voice_state(server)
+        before_channel = before.voice_channel
+        after_channel = after.voice_channel
+        self_channel = after.voice_channel
+        
+        for voice_client in self.bot.voice_clients:
+            if voice_client.server == server:
+                self_channel = voice_client.channel
+        
+        if self_channel == after_channel:
+            return
+        
+        if before_channel == None:
+            return
+        
+        if before_channel == self_channel and before_channel != after_channel:
+            if len(self_channel.voice_members) <= 1:
+                await self.stopleave(state, server)
+                    
 def setup(bot):
     bot.add_cog(Music(bot))
     print('Music is loaded')
